@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MAX FLITE Golf Tracer</title>
+<meta name="theme-color" content="#040605">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MAX FLITE">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;1,700;1,800;1,900&family=Archivo:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#040605; --surface:#0C120F; --surface2:#131B17; --ink:#F1F6F2; --muted:#8C9C92; --line:#1D2923; --green:#2BF06F; --green-deep:#0E9A45; --tracer:#39FF7A; --flag:#2BF06F; color-scheme:dark;
+  --display:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
+  --body:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#040605; --surface:#0C120F; --surface2:#131B17; --ink:#F1F6F2; --muted:#8C9C92; --line:#1D2923; --green:#2BF06F; --green-deep:#0E9A45; --tracer:#39FF7A; --flag:#2BF06F; color-scheme:dark; } }
+:root[data-theme="dark"]{ --bg:#040605; --surface:#0C120F; --surface2:#131B17; --ink:#F1F6F2; --muted:#8C9C92; --line:#1D2923; --green:#2BF06F; --green-deep:#0E9A45; --tracer:#39FF7A; --flag:#2BF06F; color-scheme:dark; }
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:focus-visible{outline:3px solid var(--flag);outline-offset:3px}
+img,video{max-width:100%}
+.screen{display:none;min-height:100%;flex-direction:column}
+.screen.on{display:flex}
+
+/* ---------- HOME ---------- */
+#home{padding:18px 22px 28px;max-width:520px;margin:0 auto;width:100%;position:relative;overflow:hidden}
+#home::before{content:"";position:absolute;inset:-20% -40% auto;height:70%;background:radial-gradient(ellipse at 50% 40%,rgba(43,240,111,.16),transparent 62%);pointer-events:none}
+.emblem{flex:1;min-height:240px;display:grid;place-items:end center;padding-bottom:14px;position:relative}
+.emblem svg{width:min(78vw,330px);height:auto;display:block;overflow:visible}
+.ticks line{stroke:var(--line);stroke-width:2;stroke-linecap:round}
+.ticks line.hi{stroke:var(--green);stroke-width:2.6}
+.ring{fill:none;stroke:url(#ringGrad);stroke-width:3}
+.arc{stroke:var(--tracer);stroke-width:7;fill:none;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:420;animation:fly 5.5s cubic-bezier(.2,.7,.3,1) infinite;filter:drop-shadow(0 0 7px rgba(57,255,122,.75))}
+.arc-core{stroke:#EFFFF3;stroke-width:2;fill:none;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:420;animation:fly 5.5s cubic-bezier(.2,.7,.3,1) infinite}
+.spark{fill:var(--tracer);animation:spark 5.5s infinite;filter:drop-shadow(0 0 6px var(--tracer))}
+@keyframes fly{0%{stroke-dashoffset:420}40%,86%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:.0}}
+@keyframes spark{0%,36%{opacity:0}42%,86%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.arc,.arc-core{animation:none;stroke-dashoffset:0}.spark{animation:none}}
+.wordmark{text-align:center;margin:4px 0 26px;position:relative}
+.wordmark h1{font-family:var(--display);font-style:italic;font-weight:900;font-size:clamp(58px,19vw,92px);line-height:.82;letter-spacing:-.015em;margin:0;text-transform:uppercase;color:var(--ink)}
+.wordmark h1 em{font-style:italic;color:var(--green);text-shadow:0 0 22px rgba(43,240,111,.45)}
+.wordmark .sub{display:flex;align-items:center;gap:12px;justify-content:center;margin-top:10px;font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.42em;color:var(--green);padding-left:.42em}
+.wordmark .sub::before,.wordmark .sub::after{content:"";height:1.5px;width:34px;background:linear-gradient(90deg,transparent,var(--green))}
+.wordmark .sub::after{transform:scaleX(-1)}
+.actions{display:grid;gap:12px;position:relative}
+.big{display:flex;align-items:center;justify-content:space-between;width:100%;padding:22px 22px;border-radius:16px;font-family:var(--display);font-style:italic;font-weight:900;font-size:34px;letter-spacing:.02em;text-transform:uppercase}
+.big small{font-family:var(--mono);font-style:normal;font-weight:700;font-size:11px;letter-spacing:.12em;opacity:.85}
+.big.primary{background:linear-gradient(135deg,#3DFF84,#12B552);color:#031007;box-shadow:0 12px 34px -12px rgba(43,240,111,.65),inset 0 1px 0 rgba(255,255,255,.35)}
+.big.secondary{background:var(--surface);border:1.5px solid var(--line);color:var(--ink)}
+.big.secondary small{color:var(--green)}
+
+.install{margin-top:14px;width:100%;padding:14px;border-radius:14px;border:1.5px dashed var(--green);color:var(--green);font-weight:700;font-size:15px;position:relative}
+.hint{margin:14px 0 0;text-align:center;font-size:13px;color:var(--muted);line-height:1.5;position:relative}
+.hint b{color:var(--ink)}
+/* ---------- PERMISSIONS ---------- */
+.perm{position:fixed;inset:0;z-index:60;background:rgba(2,4,3,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.perm.on{opacity:1;pointer-events:auto}
+.pcard{width:100%;max-width:520px;background:#070B09;border:1px solid var(--line);border-bottom:0;border-radius:24px 24px 0 0;padding:22px 20px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateY(30px);transition:transform .25s ease}
+.perm.on .pcard{transform:none}
+@media (prefers-reduced-motion: reduce){.perm,.pcard{transition:none}}
+.pcard .mark{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.pcard .mark img{width:44px;height:44px;border-radius:11px;border:1px solid var(--line)}
+.pcard h3{font-family:var(--display);font-style:italic;font-weight:900;font-size:32px;line-height:1;margin:0;text-transform:uppercase}
+.pcard h3 em{color:var(--green)}
+.pcard .lead{color:var(--muted);font-size:14px;margin:10px 0 16px;line-height:1.45}
+.prow{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin-bottom:10px}
+.prow svg{width:26px;height:26px;flex:none;color:var(--green);margin-top:2px}
+.prow div{flex:1;min-width:0}
+.prow b{display:block;font-size:16px}
+.prow span{display:block;font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
+.prow i{font-style:normal;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.08em;padding:4px 7px;border-radius:6px;border:1px solid var(--line);color:var(--muted);flex:none;align-self:center}
+.prow i[data-s="granted"]{color:#031007;background:var(--green);border-color:var(--green)}
+.prow i[data-s="denied"]{color:#FF5A4E;border-color:#FF5A4E}
+.blocked{font-size:13px;line-height:1.5;color:#FFB4AD;background:rgba(255,90,78,.08);border:1px solid rgba(255,90,78,.35);border-radius:12px;padding:12px;margin:4px 0 12px}
+.pbtns{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:8px}
+.permlink{display:block;margin:14px auto 0;font-size:13px;color:var(--muted);text-decoration:underline;position:relative}
+/* ---------- TRACER ---------- */
+#tracer{position:fixed;inset:0;background:#000;color:#fff;z-index:20}
+#tracer canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;touch-action:none}
+#cam{position:absolute;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none}
+.tbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:12px 12px 12px;padding-top:calc(env(safe-area-inset-top,0px) + 12px);z-index:3}
+.round{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:grid;place-items:center;flex:none;color:#fff}
+.round svg{width:22px;height:22px}
+.pill{flex:1;min-width:0;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:999px;padding:11px 16px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:9px}
+.pill i{width:9px;height:9px;border-radius:50%;background:#8a8a8a;flex:none}
+.pill[data-s="search"] i{background:#fff;animation:blink 1s infinite}
+.pill[data-s="locked"] i{background:var(--green)}
+.pill[data-s="flight"] i,.pill[data-s="rec"] i{background:var(--tracer);animation:blink .6s infinite}
+@keyframes blink{50%{opacity:.25}}
+.pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bbar{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:12px;padding:16px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:3}
+.chip{background:rgba(0,0,0,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;border-radius:999px;padding:13px 20px;font-weight:700;font-size:15px}
+.chip.hot{background:var(--green);color:#031007}
+.hide{display:none!important}
+.camerr{position:absolute;inset:0;display:grid;place-items:center;padding:30px;text-align:center;z-index:2}
+.camerr div{max-width:330px}
+.camerr h2{font-family:var(--display);font-style:italic;font-weight:800;font-size:34px;margin:0 0 10px;text-transform:uppercase}
+.camerr p{color:#B9C6BE;line-height:1.5;margin:0 0 18px}
+
+/* review sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:5;background:#070B09;border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding:16px 16px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px);box-shadow:0 -20px 50px rgba(0,0,0,.6);transform:translateY(105%);transition:transform .28s ease}
+.sheet.on{transform:none}
+@media (prefers-reduced-motion: reduce){.sheet{transition:none}}
+.sheet .grab{width:40px;height:4px;border-radius:4px;background:#26352D;margin:0 auto 12px}
+.sheet h3{font-family:var(--display);font-style:italic;font-weight:800;font-size:30px;margin:0;text-transform:uppercase}
+.sheet .meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin:4px 0 12px}
+.sheet video{width:100%;max-height:46vh;background:#000;border-radius:14px;display:block;object-fit:contain}
+.row2{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:14px}
+.btn{border-radius:14px;padding:16px;font-weight:700;font-size:16px;text-align:center}
+.btn.ghost{background:#131B17;color:#F1F6F2;border:1px solid var(--line)}
+.btn.hot{background:linear-gradient(135deg,#3DFF84,#12B552);color:#031007}
+
+/* ---------- GALLERY ---------- */
+.head{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;background:var(--bg);display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.head h2 b{color:var(--green);font-weight:900}
+.head h2{font-family:var(--display);font-style:italic;font-weight:800;font-size:32px;margin:0;text-transform:uppercase;flex:1}
+.head .count{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.back{width:42px;height:42px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center}
+.back svg{width:20px;height:20px}
+.wrap{max-width:720px;width:100%;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;text-align:left;padding:0;display:flex;flex-direction:column}
+.thumb{position:relative;aspect-ratio:3/4;background:#081410;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.hole{position:absolute;top:8px;left:8px;background:var(--flag);color:#031007;font-family:var(--display);font-style:italic;font-weight:800;font-size:17px;padding:2px 9px 1px;border-radius:6px;text-transform:uppercase}
+.stamp{padding:10px 12px 12px}
+.stamp b{display:block;font-size:14px;font-weight:700}
+.stamp span{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
+.empty .btn{display:inline-block;margin-top:18px}
+
+/* ---------- DETAIL ---------- */
+.player{background:#000;border-radius:16px;overflow:hidden}
+.player video{width:100%;max-height:58vh;display:block;object-fit:contain;background:#000}
+.dmeta{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:16px 2px 4px;flex-wrap:wrap}
+.dmeta .d{font-weight:700;font-size:17px}
+.dmeta .t{font-family:var(--mono);font-size:14px;color:var(--muted)}
+.sect{margin-top:18px}
+.sect h4{margin:0 0 10px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.holes{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.hbtn{aspect-ratio:1;border-radius:12px;background:var(--surface);border:1.5px solid var(--line);font-family:var(--display);font-style:italic;font-weight:800;font-size:22px}
+.hbtn.sel{background:var(--flag);border-color:var(--flag);color:#031007}
+.clearh{margin-top:8px;font-size:14px;color:var(--muted);text-decoration:underline;padding:6px 0}
+.dact{display:grid;gap:10px;margin-top:22px}
+.dact .btn{border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.dact .btn.danger{color:#FF5A4E}
+
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);transform:translateX(-50%) translateY(20px);background:#0C120F;color:#F1F6F2;border:1px solid var(--green);padding:12px 18px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;transition:.25s;z-index:50;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<section id="home" class="screen on">
+  <div class="emblem" aria-hidden="true">
+    <svg viewBox="0 0 260 260">
+      <defs>
+        <linearGradient id="ringGrad" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#0E9A45"/><stop offset=".55" stop-color="#1D2923"/><stop offset="1" stop-color="#2BF06F"/></linearGradient>
+        <radialGradient id="core" cx=".5" cy=".55" r=".55"><stop offset="0" stop-color="#0F2118"/><stop offset="1" stop-color="#040605"/></radialGradient>
+        <radialGradient id="ballG" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".7" stop-color="#DDE5DF"/><stop offset="1" stop-color="#9FB0A5"/></radialGradient>
+        <clipPath id="inside"><circle cx="130" cy="130" r="100"/></clipPath>
+      </defs>
+      <g class="ticks"><line class="hi" x1="130.0" y1="18.0" x2="130.0" y2="10.0"/><line x1="141.9" y1="16.6" x2="142.5" y2="10.7"/><line x1="153.7" y1="18.5" x2="154.9" y2="12.6"/><line x1="165.2" y1="21.6" x2="167.1" y2="15.9"/><line x1="176.4" y1="25.9" x2="178.8" y2="20.4"/><line class="hi" x1="186.0" y1="33.0" x2="190.0" y2="26.1"/><line x1="197.0" y1="37.8" x2="200.5" y2="32.9"/><line x1="206.3" y1="45.3" x2="210.3" y2="40.8"/><line x1="214.7" y1="53.7" x2="219.2" y2="49.7"/><line x1="222.2" y1="63.0" x2="227.1" y2="59.5"/><line class="hi" x1="227.0" y1="74.0" x2="233.9" y2="70.0"/><line x1="234.1" y1="83.6" x2="239.6" y2="81.2"/><line x1="238.4" y1="94.8" x2="244.1" y2="92.9"/><line x1="241.5" y1="106.3" x2="247.4" y2="105.1"/><line x1="243.4" y1="118.1" x2="249.3" y2="117.5"/><line class="hi" x1="242.0" y1="130.0" x2="250.0" y2="130.0"/><line x1="243.4" y1="141.9" x2="249.3" y2="142.5"/><line x1="241.5" y1="153.7" x2="247.4" y2="154.9"/><line x1="238.4" y1="165.2" x2="244.1" y2="167.1"/><line x1="234.1" y1="176.4" x2="239.6" y2="178.8"/><line x1="227.0" y1="186.0" x2="233.9" y2="190.0"/><line x1="222.2" y1="197.0" x2="227.1" y2="200.5"/><line x1="214.7" y1="206.3" x2="219.2" y2="210.3"/><line x1="206.3" y1="214.7" x2="210.3" y2="219.2"/><line x1="197.0" y1="222.2" x2="200.5" y2="227.1"/><line x1="186.0" y1="227.0" x2="190.0" y2="233.9"/><line x1="176.4" y1="234.1" x2="178.8" y2="239.6"/><line x1="165.2" y1="238.4" x2="167.1" y2="244.1"/><line x1="153.7" y1="241.5" x2="154.9" y2="247.4"/><line x1="141.9" y1="243.4" x2="142.5" y2="249.3"/><line x1="130.0" y1="242.0" x2="130.0" y2="250.0"/><line x1="118.1" y1="243.4" x2="117.5" y2="249.3"/><line x1="106.3" y1="241.5" x2="105.1" y2="247.4"/><line x1="94.8" y1="238.4" x2="92.9" y2="244.1"/><line x1="83.6" y1="234.1" x2="81.2" y2="239.6"/><line x1="74.0" y1="227.0" x2="70.0" y2="233.9"/><line x1="63.0" y1="222.2" x2="59.5" y2="227.1"/><line x1="53.7" y1="214.7" x2="49.7" y2="219.2"/><line x1="45.3" y1="206.3" x2="40.8" y2="210.3"/><line x1="37.8" y1="197.0" x2="32.9" y2="200.5"/><line x1="33.0" y1="186.0" x2="26.1" y2="190.0"/><line x1="25.9" y1="176.4" x2="20.4" y2="178.8"/><line x1="21.6" y1="165.2" x2="15.9" y2="167.1"/><line x1="18.5" y1="153.7" x2="12.6" y2="154.9"/><line x1="16.6" y1="141.9" x2="10.7" y2="142.5"/><line x1="18.0" y1="130.0" x2="10.0" y2="130.0"/><line x1="16.6" y1="118.1" x2="10.7" y2="117.5"/><line x1="18.5" y1="106.3" x2="12.6" y2="105.1"/><line x1="21.6" y1="94.8" x2="15.9" y2="92.9"/><line x1="25.9" y1="83.6" x2="20.4" y2="81.2"/><line class="hi" x1="33.0" y1="74.0" x2="26.1" y2="70.0"/><line x1="37.8" y1="63.0" x2="32.9" y2="59.5"/><line x1="45.3" y1="53.7" x2="40.8" y2="49.7"/><line x1="53.7" y1="45.3" x2="49.7" y2="40.8"/><line x1="63.0" y1="37.8" x2="59.5" y2="32.9"/><line class="hi" x1="74.0" y1="33.0" x2="70.0" y2="26.1"/><line x1="83.6" y1="25.9" x2="81.2" y2="20.4"/><line x1="94.8" y1="21.6" x2="92.9" y2="15.9"/><line x1="106.3" y1="18.5" x2="105.1" y2="12.6"/><line x1="118.1" y1="16.6" x2="117.5" y2="10.7"/></g>
+      <circle cx="130" cy="130" r="100" fill="url(#core)"/>
+      <circle class="ring" cx="130" cy="130" r="100"/>
+      <g clip-path="url(#inside)">
+        <path d="M30 192 Q130 176 230 192" stroke="#1D2923" stroke-width="2" fill="none"/>
+        <path d="M30 206 Q130 192 230 206" stroke="#16211C" stroke-width="2" fill="none"/>
+      </g>
+      <path class="arc" d="M92 176 C 104 92, 168 40, 238 62"/>
+      <path class="arc-core" d="M92 176 C 104 92, 168 40, 238 62"/>
+      <circle class="spark" cx="238" cy="62" r="4.5"/>
+      <rect x="88.5" y="187" width="7" height="13" rx="1.5" fill="#2BF06F"/>
+      <path d="M84 186 h16 l-4 4 h-8 z" fill="#2BF06F"/>
+      <circle cx="92" cy="176" r="12" fill="url(#ballG)"/>
+      <g fill="#9FB0A5" opacity=".7"><circle cx="88" cy="172" r="1.3"/><circle cx="93" cy="170" r="1.3"/><circle cx="97" cy="174" r="1.3"/><circle cx="90" cy="178" r="1.3"/><circle cx="95" cy="179" r="1.3"/><circle cx="86" cy="177" r="1.1"/></g>
+      <text x="130" y="218" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="9" letter-spacing="3" fill="#8C9C92">TRACE EVERY SHOT</text>
+    </svg>
+  </div>
+  <div class="wordmark">
+    <h1>Max <em>Flite</em></h1>
+    <div class="sub">GOLF TRACER</div>
+  </div>
+  <div class="actions">
+    <button class="big primary" id="goTracer">Tracer <small>OPEN CAMERA</small></button>
+    <button class="big secondary" id="goGallery">Gallery <small id="homeCount">0 SHOTS</small></button>
+  </div>
+  <button class="install hide" id="installBtn">Install app on this phone</button>
+  <button class="permlink" id="permLink">Camera &amp; storage permissions</button>
+  <p class="hint hide" id="iosHint">Install on iPhone: tap <b>Share</b>, then <b>Add to Home Screen</b>.</p>
+</section>
+
+<!-- TRACER -->
+<section id="tracer" class="screen">
+  <video id="cam" playsinline muted autoplay></video>
+  <canvas id="rec"></canvas>
+  <canvas id="hud"></canvas>
+  <div class="tbar">
+    <button class="round" id="tBack" aria-label="Back to home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="pill" id="pill" data-s="search"><i></i><span id="status">Starting camera…</span></div>
+  </div>
+  <div class="bbar">
+    <button class="chip" id="tReset">Reset lock</button>
+    <button class="chip hot hide" id="tEnd">End shot</button>
+  </div>
+  <div class="camerr hide" id="camErr"><div>
+    <h2>Camera blocked</h2>
+    <p id="camErrMsg">Allow camera access for this page, then try again.</p>
+    <button class="btn hot" id="camRetry">Try again</button>
+  </div></div>
+  <div class="sheet" id="sheet">
+    <div class="grab"></div>
+    <h3 id="sheetTitle">Shot finished</h3>
+    <div class="meta" id="sheetMeta"></div>
+    <video id="preview" playsinline muted loop autoplay></video>
+    <div class="row2">
+      <button class="btn ghost" id="discard">Discard</button>
+      <button class="btn hot" id="save">Save shot</button>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery" class="screen">
+  <div class="head">
+    <button class="back" id="gBack" aria-label="Back to home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <h2><b>MF</b> Gallery</h2><span class="count" id="gCount"></span>
+  </div>
+  <div class="wrap"><div class="grid" id="grid"></div><div id="gEmpty" class="empty hide"><strong>No shots yet</strong>Open Tracer, lock onto a ball, and save your first shot.<br><button class="btn hot" id="gToTracer">Open Tracer</button></div></div>
+</section>
+
+<!-- DETAIL -->
+<section id="detail" class="screen">
+  <div class="head">
+    <button class="back" id="dBack" aria-label="Back to gallery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <h2 id="dTitle">Shot</h2>
+  </div>
+  <div class="wrap">
+    <div class="player"><video id="dVideo" playsinline controls loop></video></div>
+    <div class="dmeta"><span class="d" id="dDate"></span><span class="t" id="dTime"></span></div>
+    <div class="sect">
+      <h4>Hole</h4>
+      <div class="holes" id="holes"></div>
+      <button class="clearh" id="clearHole">Clear hole</button>
+    </div>
+    <div class="dact">
+      <button class="btn" id="dDownload">Save to phone</button>
+      <button class="btn danger" id="dDelete">Delete shot</button>
+    </div>
+  </div>
+</section>
+
+<div class="perm" id="perm" role="dialog" aria-modal="true" aria-labelledby="permTitle">
+  <div class="pcard">
+    <div class="mark"><img src="icons/icon-192.png" alt="" onerror="this.remove()"><h3 id="permTitle">Allow <em>access</em></h3></div>
+    <p class="lead">MAX FLITE needs two things on this phone to trace and keep your shots.</p>
+    <div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.8"/></svg><div><b>Camera</b><span>Lock onto the ball and trace your shot live.</span></div><i id="pCam">NOT SET</i></div>
+    <div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5v13c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8v-13"/><path d="M4 12c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></svg><div><b>Storage</b><span>Keep your saved shots in the gallery, even after you close the app.</span></div><i id="pSto">NOT SET</i></div>
+    <div class="blocked hide" id="pBlocked"></div>
+    <div class="pbtns">
+      <button class="btn ghost" id="pDeny">Don’t allow</button>
+      <button class="btn hot" id="pAllow">Allow</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+
+/* ================= STORAGE (IndexedDB, falls back to memory) ================= */
+const DBN = 'shot-tracer', ST = 'shots';
+let memStore = [], dbp = null;
+function idb(){
+  if (dbp) return dbp;
+  dbp = new Promise((res, rej) => {
+    let r; try { r = indexedDB.open(DBN, 1); } catch (e) { rej(e); return; }
+    r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains(ST)) r.result.createObjectStore(ST, { keyPath: 'id' }); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+  return dbp;
+}
+function tx(mode, fn){
+  return idb().then(db => new Promise((res, rej) => {
+    const t = db.transaction(ST, mode); const req = fn(t.objectStore(ST));
+    t.oncomplete = () => res(req && req.result); t.onerror = () => rej(t.error);
+  }));
+}
+async function allShots(){
+  try { return (await tx('readonly', s => s.getAll())) || []; }
+  catch (e) { return memStore.slice(); }
+}
+async function putShot(s){
+  try { await tx('readwrite', st => st.put(s)); }
+  catch (e) { memStore = memStore.filter(x => x.id !== s.id); memStore.push(s); }
+}
+async function delShot(id){
+  try { await tx('readwrite', st => st.delete(id)); }
+  catch (e) { memStore = memStore.filter(x => x.id !== id); }
+}
+
+/* ================= NAV ================= */
+function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); window.scrollTo(0,0); }
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 1800); }
+const fmtDate = d => new Intl.DateTimeFormat(undefined, { weekday:'short', month:'short', day:'numeric', year:'numeric' }).format(d);
+const fmtTime = d => new Intl.DateTimeFormat(undefined, { hour:'numeric', minute:'2-digit', second:'2-digit' }).format(d);
+async function refreshCount(){ const n = (await allShots()).length; $('#homeCount').textContent = n + (n === 1 ? ' SHOT' : ' SHOTS'); return n; }
+refreshCount();
+
+$('#goTracer').onclick = () => gate('tracer');
+$('#goGallery').onclick = () => gate('gallery');
+$('#gBack').onclick = () => { cleanupUrls(); show('home'); refreshCount(); };
+$('#gToTracer').onclick = openTracer;
+$('#tBack').onclick = () => { closeTracer(); show('home'); refreshCount(); };
+
+/* ================= TRACER ENGINE ================= */
+const video = $('#cam'), rec = $('#rec'), hud = $('#hud');
+const rctx = rec.getContext('2d'), hctx = hud.getContext('2d');
+const ana = document.createElement('canvas');
+const actx = ana.getContext('2d', { willReadFrequently: true });
+let stream = null, vw = 0, vh = 0, aw = 0, ah = 0, sc = 1;
+let mode = 'off';           // off | search | locked | flight | review
+let frameIdx = 0, ring = [], pool = [], visited = null;
+const RING = 16;
+let fps = 30, lastNow = 0, lastT = -1;
+let cand = null, stable = 0, ball = null, flight = null, shotTime = null;
+
+function setStatus(s, text){ $('#pill').dataset.s = s; $('#status').textContent = text; }
+
+async function openTracer(){
+  show('tracer'); $('#camErr').classList.add('hide');
+  setStatus('idle', 'Starting camera…');
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 60 } }
+    });
+  } catch (e) {
+    stream = null;
+    $('#camErrMsg').textContent = (e && e.name === 'NotAllowedError')
+      ? 'Camera access is off. ' + unblockHelp()
+      : 'No camera could be started here. Open MAX FLITE in Safari (iPhone) or Chrome (Android) and allow camera access.';
+    $('#camErr').classList.remove('hide');
+    setStatus('idle', 'Camera unavailable');
+    return;
+  }
+  video.srcObject = stream;
+  try { await video.play(); } catch (e) {}
+  await new Promise(r => video.videoWidth ? r() : video.addEventListener('loadedmetadata', r, { once: true }));
+  setupDims(); resetToSearch(); schedule();
+}
+$('#camRetry').onclick = openTracer;
+
+function closeTracer(){
+  stopRecording(true);
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = null; mode = 'off'; flight = null; ball = null;
+  $('#sheet').classList.remove('on');
+}
+
+function setupDims(){
+  vw = video.videoWidth; vh = video.videoHeight;
+  rec.width = hud.width = vw; rec.height = hud.height = vh;
+  sc = Math.min(1, 800 / Math.max(vw, vh));
+  aw = Math.round(vw * sc); ah = Math.round(vh * sc);
+  ana.width = aw; ana.height = ah;
+  pool = []; for (let i = 0; i < RING; i++) pool.push(new Uint8Array(aw * ah));
+  ring = []; visited = new Uint8Array(aw * ah); frameIdx = 0;
+}
+
+function schedule(){
+  if (!stream) return;
+  if (video.requestVideoFrameCallback) {
+    video.requestVideoFrameCallback(() => { if (!stream) return; onFrame(); schedule(); });
+  } else {
+    requestAnimationFrame(() => {
+      if (!stream) return;
+      if (video.currentTime !== lastT) { lastT = video.currentTime; onFrame(); }
+      schedule();
+    });
+  }
+}
+
+function grab(){
+  actx.drawImage(video, 0, 0, aw, ah);
+  const d = actx.getImageData(0, 0, aw, ah).data;
+  const g = pool[frameIdx % RING];
+  for (let i = 0, j = 0; i < g.length; i++, j += 4) g[i] = (d[j] * 77 + d[j+1] * 150 + d[j+2] * 29) >> 8;
+  ring.push({ f: frameIdx, gray: g });
+  if (ring.length > RING - 1) ring.shift();
+  return g;
+}
+const frameAt = f => ring.find(e => e.f === f);
+
+function onFrame(){
+  if (video.videoWidth !== vw || video.videoHeight !== vh) { setupDims(); resetToSearch(); }
+  const now = performance.now();
+  if (lastNow) { const dt = now - lastNow; if (dt > 4 && dt < 120) fps = Math.max(15, Math.min(120, fps * 0.9 + (1000 / dt) * 0.1)); }
+  lastNow = now;
+  const f = frameIdx;
+  const g = grab();
+  rctx.drawImage(video, 0, 0, vw, vh);
+
+  if (mode === 'search') {
+    if (f % 2 === 0) updateCandidate(searchBall(g));
+  } else if (mode === 'locked') {
+    checkImpact(g, f);
+    if (mode === 'locked' && ball.run === 0 && now - recStart > 20000) startRecording(); // keep clip pre-roll short
+  } else if (mode === 'flight') {
+    if (flight.phase === 'track') {
+      const prev = frameAt(f - 1);
+      if (prev) trackStep(prev.gray, g, f);
+      if (flight.phase === 'track' && now - flight.startNow > 8000) endFlight();
+    } else if (flight.phase === 'extrap') extrapStep();
+    else if (flight.phase === 'hold' && now > flight.holdUntil) finishShot();
+  }
+  if (flight) drawTracer(rctx, flight.pts, mode === 'flight');
+  drawStamp();
+  drawHud(now);
+  frameIdx++;
+}
+
+/* ---------- blob finder (4-connected components in a region) ---------- */
+const stack = [];
+function blobs(x0, y0, x1, y1, test, maxArea){
+  x0 = Math.max(0, x0 | 0); y0 = Math.max(0, y0 | 0); x1 = Math.min(aw - 1, x1 | 0); y1 = Math.min(ah - 1, y1 | 0);
+  const out = []; if (x1 < x0 || y1 < y0) return out;
+  for (let y = y0; y <= y1; y++) visited.fill(0, y * aw + x0, y * aw + x1 + 1);
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const i = y * aw + x; if (visited[i]) continue; visited[i] = 1; if (!test(i)) continue;
+    let area = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, minx = x, maxx = x, miny = y, maxy = y;
+    stack.length = 0; stack.push(i);
+    while (stack.length) {
+      const k = stack.pop(), kx = k % aw, ky = (k - kx) / aw;
+      area++; sx += kx; sy += ky; sxx += kx * kx; syy += ky * ky; sxy += kx * ky;
+      if (kx < minx) minx = kx; if (kx > maxx) maxx = kx; if (ky < miny) miny = ky; if (ky > maxy) maxy = ky;
+      let n;
+      if (kx > x0 && !visited[n = k - 1]) { visited[n] = 1; if (test(n)) stack.push(n); }
+      if (kx < x1 && !visited[n = k + 1]) { visited[n] = 1; if (test(n)) stack.push(n); }
+      if (ky > y0 && !visited[n = k - aw]) { visited[n] = 1; if (test(n)) stack.push(n); }
+      if (ky < y1 && !visited[n = k + aw]) { visited[n] = 1; if (test(n)) stack.push(n); }
+    }
+    if (area > maxArea) continue;
+    const cx = sx / area, cy = sy / area;
+    out.push({ area, cx, cy, minx, maxx, miny, maxy, vxx: sxx / area - cx * cx, vyy: syy / area - cy * cy, vxy: sxy / area - cx * cy });
+  }
+  return out;
+}
+function principal(b){
+  const tr = b.vxx + b.vyy, det = b.vxx * b.vyy - b.vxy * b.vxy;
+  const disc = Math.sqrt(Math.max(0, tr * tr / 4 - det));
+  const l1 = tr / 2 + disc, l2 = Math.max(0.25, tr / 2 - disc);
+  let ux = 1, uy = 0;
+  if (Math.abs(b.vxy) > 1e-6) { ux = l1 - b.vyy; uy = b.vxy; const m = Math.hypot(ux, uy); ux /= m; uy /= m; }
+  else if (b.vyy > b.vxx) { ux = 0; uy = 1; }
+  return { ux, uy, elong: Math.sqrt(Math.max(l1, 0.25) / l2) };
+}
+function contrastAt(g, cx, cy, r){
+  let ds = 0, dn = 0, rs = 0, rn = 0;
+  const R2 = r * 2.6, r1 = r * 1.7, ir = Math.ceil(R2), x0 = Math.round(cx), y0 = Math.round(cy);
+  for (let dy = -ir; dy <= ir; dy++) { const y = y0 + dy; if (y < 0 || y >= ah) continue;
+    for (let dx = -ir; dx <= ir; dx++) { const x = x0 + dx; if (x < 0 || x >= aw) continue;
+      const d = Math.hypot(x - cx, y - cy), v = g[y * aw + x];
+      if (d <= r * 0.9) { ds += v; dn++; } else if (d >= r1 && d <= R2) { rs += v; rn++; } } }
+  const disk = dn ? ds / dn : 0, rg = rn ? rs / rn : 0;
+  return { disk, ring: rg, rel: (disk - rg) / Math.max(disk, 1) };
+}
+
+/* ---------- 1. find the ball at address ---------- */
+function searchBall(g){
+  const y0 = Math.floor(ah * 0.2);
+  let s = 0, s2 = 0, n = 0;
+  for (let y = y0; y < ah; y += 3) for (let x = 0; x < aw; x += 3) { const v = g[y * aw + x]; s += v; s2 += v * v; n++; }
+  const mean = s / n, sd = Math.sqrt(Math.max(0, s2 / n - mean * mean));
+  const thr = Math.min(235, Math.max(150, mean + 2.2 * sd));
+  let best = null, bs = -1;
+  for (const b of blobs(0, y0, aw - 1, ah - 1, i => g[i] > thr, 500)) {
+    if (b.area < 3) continue;
+    const bw = b.maxx - b.minx + 1, bh = b.maxy - b.miny + 1;
+    if (Math.max(bw, bh) / Math.min(bw, bh) > 1.8) continue;
+    const fill = b.area / (bw * bh); if (fill < 0.5) continue;
+    const r = Math.max(1.5, Math.sqrt(b.area / Math.PI));
+    const c = contrastAt(g, b.cx, b.cy, r); if (c.rel < 0.18) continue;
+    const score = fill + c.rel + (b.cy / ah) * 0.4 + Math.min(r, 8) / 16;
+    if (score > bs) { bs = score; best = { x: b.cx, y: b.cy, r }; }
+  }
+  return best;
+}
+function updateCandidate(c){
+  if (c && cand && Math.hypot(c.x - cand.x, c.y - cand.y) < Math.max(3, c.r)) { stable++; cand = c; }
+  else { cand = c; stable = c ? 1 : 0; }
+  const need = Math.round(fps * 0.7); // about 1.4 s of steady detection (checked every 2nd frame)
+  if (cand && stable >= need) lock(cand);
+  else setStatus('search', cand ? 'Ball spotted — hold steady or tap it to lock' : 'Tap the ball to lock on');
+}
+function lockAtTap(ax, ay){
+  const e = ring[ring.length - 1]; if (!e) return; const g = e.gray;
+  const W = Math.round(Math.max(12, aw * 0.05));
+  let mx = -1, mi = -1, sum = 0, n = 0;
+  for (let y = Math.max(0, ay - W); y <= Math.min(ah - 1, ay + W); y++)
+    for (let x = Math.max(0, ax - W); x <= Math.min(aw - 1, ax + W); x++) { const v = g[y * aw + x]; sum += v; n++; if (v > mx) { mx = v; mi = y * aw + x; } }
+  const mean = sum / n;
+  if (mx - mean < 25) { lock({ x: ax, y: ay, r: Math.max(2, aw * 0.008) }); return; }
+  const thr = mean + (mx - mean) * 0.55, mxx = mi % aw, myy = (mi - mxx) / aw;
+  let best = null, bd = 1e9;
+  for (const b of blobs(ax - W, ay - W, ax + W, ay + W, i => g[i] > thr, 2000)) {
+    const d = Math.hypot(b.cx - mxx, b.cy - myy); if (d < bd) { bd = d; best = b; }
+  }
+  if (best) lock({ x: best.cx, y: best.cy, r: Math.max(1.5, Math.sqrt(best.area / Math.PI)) });
+  else lock({ x: mxx, y: myy, r: 3 });
+}
+function lock(c){
+  const g = ring[ring.length - 1].gray;
+  const cr = contrastAt(g, c.x, c.y, c.r);
+  const tpl = [], R = Math.ceil(c.r);
+  for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+    if (dx * dx + dy * dy > c.r * c.r) continue;
+    const x = Math.round(c.x) + dx, y = Math.round(c.y) + dy;
+    if (x >= 0 && y >= 0 && x < aw && y < ah) tpl.push(dx, dy, g[y * aw + x]);
+  }
+  ball = { x: c.x, y: c.y, r: c.r, rel0: cr.rel, tpl, base: 6, run: 0, start: 0 };
+  mode = 'locked'; cand = null; stable = 0;
+  setStatus('locked', 'Locked — take your shot');
+  if (navigator.vibrate) navigator.vibrate(25);
+  startRecording();
+}
+hud.addEventListener('pointerdown', ev => {
+  if (mode !== 'search' && mode !== 'locked') return;
+  const rect = hud.getBoundingClientRect();
+  const s = Math.min(rect.width / vw, rect.height / vh);
+  const ox = (rect.width - vw * s) / 2, oy = (rect.height - vh * s) / 2;
+  const vx = (ev.clientX - rect.left - ox) / s, vy = (ev.clientY - rect.top - oy) / s;
+  if (vx < 0 || vy < 0 || vx > vw || vy > vh) return;
+  if (mode === 'locked') { stopRecording(true); mode = 'search'; }
+  lockAtTap(Math.round(vx * sc), Math.round(vy * sc));
+});
+
+/* ---------- 2. detect impact (ball leaves its spot) ---------- */
+function templateDiff(g){
+  let best = 1e9;
+  for (let oy = -2; oy <= 2; oy++) for (let ox = -2; ox <= 2; ox++) {
+    let s = 0, n = 0; const bx = Math.round(ball.x) + ox, by = Math.round(ball.y) + oy;
+    for (let k = 0; k < ball.tpl.length; k += 3) {
+      const x = bx + ball.tpl[k], y = by + ball.tpl[k+1];
+      if (x < 0 || y < 0 || x >= aw || y >= ah) continue;
+      s += Math.abs(g[y * aw + x] - ball.tpl[k+2]); n++;
+    }
+    if (n) best = Math.min(best, s / n);
+  }
+  return best;
+}
+function checkImpact(g, f){
+  let miss;
+  if (ball.rel0 >= 0.12) {
+    let best = -1;
+    for (let oy = -2; oy <= 2; oy++) for (let ox = -2; ox <= 2; ox++) best = Math.max(best, contrastAt(g, ball.x + ox, ball.y + oy, ball.r).rel);
+    miss = best < ball.rel0 * 0.45;
+  } else {
+    const td = templateDiff(g);
+    miss = td > Math.max(28, ball.base * 3 + 8);
+    if (!miss) ball.base = ball.base * 0.9 + td * 0.1;
+  }
+  if (miss) { if (!ball.run) ball.start = f; ball.run++; } else ball.run = 0;
+  if (ball.run >= Math.max(4, Math.round(fps * 0.13))) beginFlight(ball.start);
+}
+
+/* ---------- 3. follow the ball in flight ---------- */
+function polyfit(ts, vs, deg){
+  const n = ts.length;
+  if (deg === 2 && n >= 3) {
+    let s1 = 0, s2 = 0, s3 = 0, s4 = 0, b0 = 0, b1 = 0, b2 = 0;
+    for (let i = 0; i < n; i++) { const t = ts[i], v = vs[i], t2 = t * t; s1 += t; s2 += t2; s3 += t2 * t; s4 += t2 * t2; b0 += v; b1 += v * t; b2 += v * t2; }
+    const A = [[n, s1, s2], [s1, s2, s3], [s2, s3, s4]], b = [b0, b1, b2];
+    const det3 = M => M[0][0]*(M[1][1]*M[2][2]-M[1][2]*M[2][1]) - M[0][1]*(M[1][0]*M[2][2]-M[1][2]*M[2][0]) + M[0][2]*(M[1][0]*M[2][1]-M[1][1]*M[2][0]);
+    const D = det3(A);
+    if (Math.abs(D) > 1e-9) {
+      const col = (c) => A.map((r, i) => r.map((v, j) => j === c ? b[i] : v));
+      return [det3(col(0)) / D, det3(col(1)) / D, det3(col(2)) / D];
+    }
+  }
+  if (n >= 2) {
+    let st = 0, sv = 0, stt = 0, stv = 0;
+    for (let i = 0; i < n; i++) { st += ts[i]; sv += vs[i]; stt += ts[i] * ts[i]; stv += ts[i] * vs[i]; }
+    const den = n * stt - st * st; if (Math.abs(den) < 1e-9) return [vs[n-1], 0, 0];
+    const m = (n * stv - st * sv) / den; return [(sv - m * st) / n, m, 0];
+  }
+  return [vs[0], 0, 0];
+}
+const ev = (c, t) => c[0] + c[1] * t + c[2] * t * t;
+function realPts(){ return flight.pts.filter(p => !p.est); }
+function predict(P, f){
+  const m = Math.min(8, P.length), Q = P.slice(-m), tref = Q[m-1].f;
+  const ts = Q.map(p => p.f - tref);
+  const cx = polyfit(ts, Q.map(p => p.x), m >= 6 ? 2 : 1);
+  const cy = polyfit(ts, Q.map(p => p.y), m >= 4 ? 2 : 1);
+  return { x: ev(cx, f - tref), y: ev(cy, f - tref) };
+}
+function beginFlight(f0){
+  shotTime = new Date();
+  flight = { pts: [{ x: ball.x, y: ball.y, f: f0 }], f0, phase: 'track', startNow: performance.now() };
+  mode = 'flight'; setStatus('flight', 'Tracking shot…');
+  $('#tEnd').classList.remove('hide'); $('#tReset').classList.add('hide');
+  for (const e of ring.slice()) {             // catch up on frames buffered while impact was confirmed
+    if (e.f <= f0) continue;
+    const prev = frameAt(e.f - 1); if (prev) trackStep(prev.gray, e.gray, e.f);
+    if (flight.phase !== 'track') break;
+  }
+}
+function trackStep(pg, cg, f){
+  const P = realPts(), last = P[P.length - 1], R = ball.r, DT = 22;
+  const diff = i => Math.abs(cg[i] - pg[i]) > DT;
+  if (P.length === 1) {                       // first sighting: small moving blob above the ball
+    if (f - flight.f0 > Math.round(fps * 0.5)) { endFlight(); return; }
+    const bl = blobs(ball.x - aw * 0.35, 0, ball.x + aw * 0.35, ball.y - R * 1.2, diff, 4000);
+    let best = null, bs = -1e9;
+    for (const b of bl) {
+      if (b.area < 2 || b.area > Math.max(260, R * R * 40)) continue;
+      const d = Math.hypot(b.cx - ball.x, b.cy - ball.y); if (d < R * 3 + 4) continue;
+      const pa = principal(b), vx = (b.cx - ball.x) / d, vy = (b.cy - ball.y) / d;
+      const align = pa.elong > 1.8 ? Math.abs(pa.ux * vx + pa.uy * vy) : 0.7;
+      const s = align * 1.2 + (-vy) * 0.8 - b.area / 300 - d / (ah * 1.2);
+      if (s > bs) { bs = s; best = b; }
+    }
+    if (best && bs > 0.3) flight.pts.push({ x: best.cx, y: best.cy, f });
+    return;
+  }
+  const pr = predict(P, f), pp = predict(P, f - 1);
+  const v = Math.hypot(pr.x - pp.x, pr.y - pp.y), gap = f - last.f;
+  const Rs = Math.max(10, v * 0.9 + 6 + (gap - 1) * 4);
+  const bl = blobs(pr.x - Rs, pr.y - Rs, pr.x + Rs, pr.y + Rs, diff, 600);
+  let best = null, bd = 1e9;
+  const sx = pr.x - last.x, sy = pr.y - last.y, sm = Math.hypot(sx, sy) || 1;
+  for (const b of bl) {
+    if (b.area > 350) continue;
+    if (Math.hypot(b.cx - pp.x, b.cy - pp.y) < Math.max(3, v * 0.4)) continue;        // ghost at previous spot
+    const tx = b.cx - last.x, ty = b.cy - last.y, tm = Math.hypot(tx, ty) || 1;
+    if ((tx * sx + ty * sy) / (tm * sm) < 0.5) continue;                               // must keep heading the same way
+    const d = Math.hypot(b.cx - pr.x, b.cy - pr.y); if (d < bd) { bd = d; best = b; }
+  }
+  if (best && bd <= Rs) flight.pts.push({ x: best.cx, y: best.cy, f });
+  else if (gap > Math.round(fps * 0.33) || pr.y < -ah * 0.1 || pr.x < -aw * 0.1 || pr.x > aw * 1.1) endFlight();
+}
+function endFlight(){
+  const P = realPts();
+  if (P.length < 3) {                          // not enough real points to draw an honest tracer
+    flight.failed = true; flight.phase = 'hold'; flight.holdUntil = performance.now() + 700;
+    setStatus('rec', 'Lost the ball — finishing clip');
+    return;
+  }
+  const tref = P[P.length - 1].f, ts = P.map(p => p.f - tref);
+  const cx = polyfit(ts, P.map(p => p.x), P.length >= 6 ? 2 : 1);
+  const cy = polyfit(ts, P.map(p => p.y), 2);
+  if (cy[2] <= 1e-4) cy[2] = cy[1] < 0 ? -cy[1] / (2 * fps * 1.5) : 0.02;
+  const tv = -cy[1] / (2 * cy[2]);
+  const yApex = tv > 0 ? ev(cy, tv) : Math.min(...P.map(p => p.y));
+  const yLand = yApex + (P[0].y - yApex) * 0.3;
+  const T = Math.max(tv, fps) * 2;
+  if (Math.abs(cx[2]) * T * T > aw * 0.4) cx[2] = Math.sign(cx[2]) * aw * 0.4 / (T * T);
+  flight.ext = { cx, cy, t: 0, tv, yLand, maxT: fps * 5 };
+  flight.phase = 'extrap';
+  if (tv <= 0 && P[P.length - 1].y >= yLand) holdNow();
+}
+function extrapStep(){
+  const e = flight.ext; e.t += 1;
+  const x = ev(e.cx, e.t), y = ev(e.cy, e.t);
+  flight.pts.push({ x, y, f: 0, est: true });
+  if ((e.t > e.tv && y >= e.yLand) || e.t > e.maxT || y > ah * 1.2 || x < -aw * 0.5 || x > aw * 1.5) holdNow();
+}
+function holdNow(){ flight.phase = 'hold'; flight.holdUntil = performance.now() + 1300; setStatus('rec', 'Shot finished'); }
+$('#tEnd').onclick = () => { if (mode === 'flight' && flight.phase === 'track') endFlight(); else if (mode === 'flight' && flight.phase === 'extrap') holdNow(); };
+
+/* ---------- drawing ---------- */
+function tracePath(ctx, pts){
+  const k = 1 / sc; ctx.beginPath(); ctx.moveTo(pts[0].x * k, pts[0].y * k);
+  for (let i = 1; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i+1];
+    ctx.quadraticCurveTo(a.x * k, a.y * k, (a.x + b.x) / 2 * k, (a.y + b.y) / 2 * k);
+  }
+  const l = pts[pts.length - 1]; ctx.lineTo(l.x * k, l.y * k);
+}
+function drawTracer(ctx, pts, live){
+  if (pts.length < 2) return;
+  const lw = Math.max(4, Math.min(vw, vh) * 0.012);
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  tracePath(ctx, pts); ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = lw * 2.4; ctx.stroke(); tracePath(ctx, pts); ctx.strokeStyle = 'rgba(57,255,122,.35)'; ctx.lineWidth = lw * 2.6; ctx.shadowColor = '#39FF7A'; ctx.shadowBlur = lw * 3; ctx.stroke();
+  ctx.shadowBlur = 0;
+  tracePath(ctx, pts); ctx.strokeStyle = '#39FF7A'; ctx.lineWidth = lw; ctx.stroke();
+  tracePath(ctx, pts); ctx.strokeStyle = 'rgba(239,255,243,.95)'; ctx.lineWidth = lw * 0.34; ctx.stroke();
+  if (live && flight && flight.phase !== 'hold') {
+    const h = pts[pts.length - 1]; ctx.beginPath(); ctx.arc(h.x / sc, h.y / sc, lw * 0.9, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+  }
+  ctx.restore();
+}
+function drawStamp(){
+  const d = shotTime || new Date();
+  const txt = (fmtDate(d) + '  ' + fmtTime(d)).toUpperCase();
+  const fs = Math.max(14, Math.round(Math.min(vw, vh) * 0.03));
+  rctx.save(); rctx.font = `700 ${fs}px "JetBrains Mono", ui-monospace, monospace`;
+  const w = rctx.measureText(txt).width, pad = fs * 0.55, x = fs, y = vh - fs * 1.4;
+  rctx.fillStyle = 'rgba(0,0,0,.55)'; rctx.fillRect(x - pad, y - fs - pad * 0.6, w + pad * 2, fs + pad * 1.4);
+  rctx.fillStyle = '#2BF06F'; rctx.fillRect(x - pad, y - fs - pad * 0.6, fs * 0.22, fs + pad * 1.4);
+  rctx.fillStyle = '#fff'; rctx.fillText(txt, x + fs * 0.1, y);
+  const bf = Math.round(fs * 1.35), by = fs * 1.2 + bf;
+  rctx.textAlign = 'right';
+  rctx.font = `italic 900 ${bf}px "Barlow Condensed", "Arial Narrow", sans-serif`;
+  const g1 = rctx.measureText('FLITE').width;
+  rctx.fillStyle = 'rgba(0,0,0,.5)'; rctx.fillText('MAX FLITE', vw - fs + 2, by + 2);
+  rctx.fillStyle = '#2BF06F'; rctx.fillText('FLITE', vw - fs, by);
+  rctx.fillStyle = '#FFFFFF'; rctx.fillText('MAX ', vw - fs - g1, by);
+  rctx.font = `700 ${Math.round(fs * 0.55)}px "JetBrains Mono", monospace`; rctx.fillStyle = '#2BF06F';
+  rctx.fillText('G O L F   T R A C E R', vw - fs, by + fs * 0.9);
+  rctx.restore();
+}
+function drawHud(now){
+  hctx.clearRect(0, 0, vw, vh);
+  const u = Math.min(vw, vh) / 100;
+  let p = null, color;
+  if (mode === 'search' && cand) { p = cand; color = '#FFFFFF'; }
+  else if (mode === 'locked' && ball) { p = ball; color = '#2BF06F'; }
+  if (!p) return;
+  const x = p.x / sc, y = p.y / sc;
+  const r = Math.max(u * 4, (p.r / sc) * 2.4) * (mode === 'search' ? 1 + 0.12 * Math.sin(now / 160) : 1);
+  hctx.save(); hctx.strokeStyle = color; hctx.lineWidth = Math.max(2, u * 0.6);
+  if (mode === 'search') hctx.setLineDash([u * 1.6, u * 1.2]);
+  hctx.beginPath(); hctx.arc(x, y, r, 0, Math.PI * 2); hctx.stroke(); hctx.setLineDash([]);
+  if (mode === 'locked') {
+    const b = r * 1.7, L = r * 0.6; hctx.beginPath();
+    for (const [sx, sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]) { hctx.moveTo(x + sx * b, y + sy * (b - L)); hctx.lineTo(x + sx * b, y + sy * b); hctx.lineTo(x + sx * (b - L), y + sy * b); }
+    hctx.stroke();
+    hctx.font = `700 ${Math.round(u * 3.2)}px "JetBrains Mono", monospace`; hctx.fillStyle = color; hctx.textAlign = 'center';
+    hctx.fillText('LOCKED', x, y - b - u * 1.5);
+  }
+  hctx.restore();
+}
+
+/* ---------- recording ---------- */
+let recorder = null, chunks = [], recToken = 0, recStart = 0, recStream = null;
+const recMime = (() => {
+  if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return '';
+  for (const m of ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'])
+    if (MediaRecorder.isTypeSupported(m)) return m;
+  return '';
+})();
+function startRecording(){
+  stopRecording(true);
+  if (!window.MediaRecorder || !rec.captureStream) return;
+  if (!recStream) recStream = rec.captureStream(30);
+  try { recorder = new MediaRecorder(recStream, recMime ? { mimeType: recMime, videoBitsPerSecond: 6e6 } : undefined); }
+  catch (e) { try { recorder = new MediaRecorder(recStream); } catch (e2) { recorder = null; return; } }
+  chunks = []; const tok = ++recToken;
+  recorder.ondataavailable = e => { if (tok === recToken && e.data && e.data.size) chunks.push(e.data); };
+  recorder.start(250); recStart = performance.now();
+}
+function stopRecording(discard){
+  return new Promise(res => {
+    if (!recorder || recorder.state === 'inactive') { recorder = null; res(null); return; }
+    const r = recorder, tok = discard ? ++recToken : recToken;
+    r.onstop = () => { if (discard || tok !== recToken) { res(null); return; } res(new Blob(chunks, { type: (r.mimeType || recMime || 'video/webm').split(';')[0] })); };
+    recorder = null; try { r.stop(); } catch (e) { res(null); }
+  });
+}
+
+/* ---------- review: save / discard ---------- */
+let pending = null, previewUrl = null;
+async function finishShot(){
+  mode = 'review';
+  $('#tEnd').classList.add('hide');
+  const blob = await stopRecording(false);
+  const tc = document.createElement('canvas'); const tw = 300; tc.width = tw; tc.height = Math.round(tw * vh / vw);
+  tc.getContext('2d').drawImage(rec, 0, 0, tc.width, tc.height);
+  pending = { blob, thumb: tc.toDataURL('image/jpeg', 0.7), createdAt: (shotTime || new Date()).getTime(), traced: !(flight && flight.failed) };
+  $('#sheetTitle').textContent = pending.traced ? 'Shot finished' : 'Ball not tracked';
+  $('#sheetMeta').textContent = (fmtDate(new Date(pending.createdAt)) + ' · ' + fmtTime(new Date(pending.createdAt))).toUpperCase();
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  const pv = $('#preview');
+  if (blob && blob.size) { previewUrl = URL.createObjectURL(blob); pv.src = previewUrl; pv.classList.remove('hide'); pv.play().catch(() => {}); $('#save').disabled = false; $('#save').textContent = 'Save shot'; }
+  else { pv.removeAttribute('src'); pv.classList.add('hide'); $('#save').disabled = true; $('#save').textContent = 'Recording not supported'; }
+  setStatus('idle', 'Save or discard this shot');
+  $('#sheet').classList.add('on');
+}
+$('#save').onclick = async () => {
+  if (!pending || !pending.blob) return;
+  const shot = { id: 's' + pending.createdAt + Math.random().toString(36).slice(2, 6), createdAt: pending.createdAt, blob: pending.blob, mime: pending.blob.type, thumb: pending.thumb, hole: null, traced: pending.traced };
+  await putShot(shot); keepStorage(); toast('Saved to Gallery'); closeSheet();
+};
+$('#discard').onclick = () => { toast('Shot discarded'); closeSheet(); };
+function closeSheet(){
+  $('#sheet').classList.remove('on'); const pv = $('#preview'); pv.pause(); pv.removeAttribute('src');
+  if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+  pending = null; resetToSearch();
+}
+function resetToSearch(){
+  stopRecording(true);
+  flight = null; ball = null; cand = null; stable = 0; shotTime = null; mode = 'search';
+  $('#tEnd').classList.add('hide'); $('#tReset').classList.remove('hide');
+  setStatus('search', 'Tap the ball to lock on');
+}
+$('#tReset').onclick = () => { if (mode === 'search' || mode === 'locked') resetToSearch(); };
+
+/* ================= GALLERY ================= */
+let urls = [];
+function cleanupUrls(){ urls.forEach(u => URL.revokeObjectURL(u)); urls = []; const v = $('#dVideo'); v.pause(); v.removeAttribute('src'); }
+async function openGallery(){
+  cleanupUrls(); show('gallery');
+  const shots = (await allShots()).sort((a, b) => b.createdAt - a.createdAt);
+  $('#gCount').textContent = shots.length ? shots.length + (shots.length === 1 ? ' shot' : ' shots') : '';
+  const grid = $('#grid'); grid.innerHTML = '';
+  $('#gEmpty').classList.toggle('hide', shots.length > 0);
+  for (const s of shots) {
+    const d = new Date(s.createdAt);
+    const b = document.createElement('button'); b.className = 'card';
+    b.innerHTML = `<div class="thumb"><img alt=""></div><div class="stamp"><b></b><span></span></div>`;
+    b.querySelector('img').src = s.thumb;
+    if (s.hole) { const h = document.createElement('div'); h.className = 'hole'; h.textContent = 'Hole ' + s.hole; b.querySelector('.thumb').appendChild(h); }
+    b.querySelector('b').textContent = fmtDate(d);
+    b.querySelector('span').textContent = fmtTime(d);
+    b.onclick = () => openDetail(s);
+    grid.appendChild(b);
+  }
+}
+let current = null;
+function openDetail(s){
+  cleanupUrls(); current = s; show('detail');
+  const d = new Date(s.createdAt);
+  $('#dTitle').textContent = s.hole ? 'Hole ' + s.hole : 'Shot';
+  $('#dDate').textContent = fmtDate(d); $('#dTime').textContent = fmtTime(d);
+  const u = URL.createObjectURL(s.blob); urls.push(u); const v = $('#dVideo'); v.src = u; v.play().catch(() => {});
+  renderHoles();
+}
+function renderHoles(){
+  const h = $('#holes'); h.innerHTML = '';
+  for (let i = 1; i <= 18; i++) {
+    const b = document.createElement('button'); b.className = 'hbtn' + (current.hole === i ? ' sel' : ''); b.textContent = i;
+    b.setAttribute('aria-label', 'Hole ' + i); b.setAttribute('aria-pressed', current.hole === i);
+    b.onclick = () => setHole(i); h.appendChild(b);
+  }
+  $('#clearHole').classList.toggle('hide', !current.hole);
+}
+async function setHole(n){
+  current.hole = n; await putShot(current); renderHoles();
+  $('#dTitle').textContent = n ? 'Hole ' + n : 'Shot';
+  toast(n ? 'Tagged Hole ' + n : 'Hole cleared');
+}
+$('#clearHole').onclick = () => setHole(null);
+$('#dBack').onclick = openGallery;
+$('#dDelete').onclick = async () => {
+  if (!current || !confirm('Delete this shot? This can’t be undone.')) return;
+  await delShot(current.id); toast('Shot deleted'); openGallery();
+};
+
+
+/* ================= PERMISSIONS ================= */
+const PKEY = 'mf-permissions';
+const getFlag = () => { try { return localStorage.getItem(PKEY); } catch (e) { return null; } };
+const setFlag = v => { try { localStorage.setItem(PKEY, v); } catch (e) {} };
+async function camState(){
+  try { if (navigator.permissions && navigator.permissions.query) return (await navigator.permissions.query({ name: 'camera' })).state; } catch (e) {}
+  return 'prompt';
+}
+async function stoState(){
+  try { if (navigator.storage && navigator.storage.persisted) return (await navigator.storage.persisted()) ? 'granted' : 'prompt'; } catch (e) {}
+  return 'prompt';
+}
+function unblockHelp(){
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  return ios
+    ? 'To turn it back on: open the iPhone Settings app → Safari → Camera → Allow, then reopen MAX FLITE.'
+    : 'To turn it back on: tap the icon left of the web address (or long-press the MAX FLITE app icon → App info) → Permissions → Camera → Allow, then reopen MAX FLITE.';
+}
+const label = st => st === 'granted' ? 'ALLOWED' : st === 'denied' ? 'BLOCKED' : 'NOT SET';
+let permTarget = null;
+async function showPerm(target){
+  permTarget = target;
+  const [c, st] = await Promise.all([camState(), stoState()]);
+  const pc = $('#pCam'), ps = $('#pSto');
+  pc.dataset.s = c; pc.textContent = label(c);
+  const stoShown = st === 'granted' || getFlag() === 'allowed' ? 'granted' : getFlag() === 'denied' ? 'denied' : 'prompt';
+  ps.dataset.s = stoShown; ps.textContent = label(stoShown);
+  const b = $('#pBlocked');
+  if (c === 'denied') { b.textContent = 'Camera is blocked for MAX FLITE. ' + unblockHelp(); b.classList.remove('hide'); }
+  else b.classList.add('hide');
+  $('#pAllow').textContent = target === 'tracer' ? 'Allow & open Tracer' : target === 'gallery' ? 'Allow & open Gallery' : 'Allow';
+  $('#perm').classList.add('on');
+  setTimeout(() => $('#pAllow').focus(), 50);
+}
+function hidePerm(){ $('#perm').classList.remove('on'); }
+async function gate(target){
+  const flag = getFlag(), c = await camState();
+  if (target === 'tracer') {
+    if (c === 'granted' || (flag === 'allowed' && c !== 'denied')) { openTracer(); return; }
+    showPerm('tracer'); return;
+  }
+  if (!flag) { showPerm('gallery'); return; }
+  openGallery();
+}
+$('#pAllow').onclick = async () => {
+  setFlag('allowed');
+  try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) {}
+  const t = permTarget; hidePerm();
+  if (t === 'tracer') { openTracer(); return; }         // Tracer asks the phone for camera right away
+  try {                                                  // otherwise ask for camera now, then release it
+    const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+    st.getTracks().forEach(tr => tr.stop());
+    toast('Camera & storage allowed');
+  } catch (e) { toast('Camera not allowed — Tracer needs it'); }
+  if (t === 'gallery') openGallery();
+};
+$('#pDeny').onclick = () => {
+  const t = permTarget; hidePerm();
+  if (t === 'tracer') { toast('Tracer needs the camera to work'); return; }
+  setFlag('denied');
+  if (t === 'gallery') openGallery();
+};
+$('#perm').addEventListener('click', e => { if (e.target.id === 'perm') hidePerm(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#perm').classList.contains('on')) hidePerm(); });
+$('#permLink').onclick = () => showPerm(null);
+
+/* ================= SAVE TO PHONE ================= */
+let downloads = null;
+const inClaude = !!(window.claude && typeof window.claude.use === 'function');
+if (inClaude) window.claude.use('downloads').then(d => { downloads = d; }).catch(() => {});
+function fileName(shot){
+  const d = new Date(shot.createdAt), p = n => String(n).padStart(2, '0');
+  const ext = (shot.mime || shot.blob.type || '').includes('mp4') ? 'mp4' : 'webm';
+  return `maxflite-${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${shot.hole ? '-hole' + shot.hole : ''}.${ext}`;
+}
+async function saveToPhone(shot){
+  const name = fileName(shot), type = shot.mime || shot.blob.type || 'video/mp4';
+  if (downloads) {
+    try { await downloads.save({ filename: name, data: shot.blob }); toast('Saved to phone'); }
+    catch (e) { if (e && e.code !== 'declined') toast('Couldn’t save to phone here'); }
+    return;
+  }
+  try {  // iPhone: share sheet → "Save Video" puts it in Photos. Android: share to Photos/Files.
+    const file = new File([shot.blob], name, { type });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'MAX FLITE shot' }); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  const u = URL.createObjectURL(shot.blob), a = document.createElement('a');
+  a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(u), 5000); toast('Download started');
+}
+$('#dDownload').onclick = () => { if (current) saveToPhone(current); };
+
+/* ================= INSTALL + KEEP STORAGE ================= */
+function keepStorage(){ try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(p => { if (!p) navigator.storage.persist(); }).catch(() => {}); } catch (e) {} }
+keepStorage();
+if (!inClaude && 'serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (!inClaude) $('#installBtn').classList.remove('hide'); });
+$('#installBtn').onclick = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} installEvt = null; $('#installBtn').classList.add('hide'); };
+window.addEventListener('appinstalled', () => { $('#installBtn').classList.add('hide'); toast('MAX FLITE installed'); });
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (isIOS && !standalone && !inClaude) $('#iosHint').classList.remove('hide');
+})();
+</script>
+</body>
+</html>
